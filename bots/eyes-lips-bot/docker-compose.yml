@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  eyes-lips-bot:
+    build:
+      context: ../../  # リポジトリルートをコンテキストに
+      dockerfile: bots/eyes-lips-bot/Containerfile
+      target: production
+    container_name: eyes-lips-bot
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    # ログ管理（オプション）
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,45 @@
+# ベースイメージ: Node.js 24 Alpine
+FROM node:24-alpine AS base
+
+# 作業ディレクトリ設定
+WORKDIR /app
+
+# 依存関係インストールステージ
+FROM base AS dependencies
+
+# Monorepo全体をコピー（workspaces対応）
+COPY package*.json ./
+COPY packages ./packages
+COPY bots/eyes-lips-bot/package*.json ./bots/eyes-lips-bot/
+
+# workspace全体の依存関係をインストール
+RUN npm ci --workspaces --only=production && \
+    npm cache clean --force
+
+# 本番イメージ
+FROM base AS production
+
+# 非rootユーザーで実行（セキュリティ対策）
+USER node
+
+# 作業ディレクトリ
+WORKDIR /app
+
+# 依存関係をコピー
+COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
+COPY --from=dependencies --chown=node:node /app/packages ./packages
+COPY --from=dependencies --chown=node:node /app/bots/eyes-lips-bot/node_modules ./bots/eyes-lips-bot/node_modules
+
+# ソースコードをコピー
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node bots/eyes-lips-bot ./bots/eyes-lips-bot
+
+# 作業ディレクトリをbotに設定
+WORKDIR /app/bots/eyes-lips-bot
+
+# ヘルスチェック（オプション）
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node -e "process.exit(0)"
+
+# 起動コマンド
+CMD ["node", "src/index.js"]
