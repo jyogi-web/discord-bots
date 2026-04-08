@@ -12,7 +12,7 @@
 
 ## 構成
 
-```
+```text
 discord-bots/
 ├── package.json
 ├── tsconfig.base.json
