@@ -7,8 +7,6 @@ COPY packages/shared/package*.json ./packages/shared/
 COPY packages/discord-api/package*.json ./packages/discord-api/
 COPY packages/utils/package*.json ./packages/utils/
 COPY apps/toy-bear-bot/package*.json ./apps/toy-bear-bot/
-COPY bots/eyes-lips-bot/package*.json ./bots/eyes-lips-bot/
-COPY bots/kawaii-bot/package*.json ./bots/kawaii-bot/
 RUN npm ci --workspaces --only=production && \
     npm cache clean --force
 
@@ -18,8 +16,6 @@ COPY packages/shared/package*.json ./packages/shared/
 COPY packages/discord-api/package*.json ./packages/discord-api/
 COPY packages/utils/package*.json ./packages/utils/
 COPY apps/toy-bear-bot/package*.json ./apps/toy-bear-bot/
-COPY bots/eyes-lips-bot/package*.json ./bots/eyes-lips-bot/
-COPY bots/kawaii-bot/package*.json ./bots/kawaii-bot/
 RUN npm ci && npm install -g typescript
 COPY packages ./packages
 COPY tsconfig.base.json ./
