@@ -7,7 +7,7 @@ COPY packages/shared/package*.json ./packages/shared/
 COPY packages/discord-api/package*.json ./packages/discord-api/
 COPY packages/utils/package*.json ./packages/utils/
 COPY apps/toy-bear-bot/package*.json ./apps/toy-bear-bot/
-RUN npm ci --workspaces --only=production && \
+RUN npm ci --workspaces --omit=dev --ignore-scripts && \
     npm cache clean --force
 
 FROM base AS build
