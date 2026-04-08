@@ -68,14 +68,19 @@ export function setupKawaii(client: Client, logger: Logger): void {
 
 function createMessageEmbed(reaction: MessageReaction, reactor: User): EmbedBuilder {
   const message = reaction.message;
+  const author = message.author;
   const embed = new EmbedBuilder()
     .setTitle('リアクションで共有されました')
-    .setDescription(message.content || '（内容なし）')
-    .setAuthor({
-      name: message.author!.tag,
-      iconURL: message.author!.displayAvatarURL(),
-    })
-    .addFields(
+    .setDescription(message.content || '（内容なし）');
+
+  if (author) {
+    embed.setAuthor({
+      name: author.tag,
+      iconURL: author.displayAvatarURL(),
+    });
+  }
+
+  embed.addFields(
       { name: 'チャンネル', value: `#${'name' in message.channel ? message.channel.name : 'DM'}`, inline: true },
       { name: '反応したユーザー', value: reactor.tag, inline: true },
       { name: '送信日時', value: message.createdAt.toLocaleString('ja-JP'), inline: false }

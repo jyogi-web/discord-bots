@@ -6,19 +6,30 @@ export class ShutdownManager {
   private logger: Logger;
   private handlers: ShutdownHandler[];
   private signals: NodeJS.Signals[];
+  private isRegistered: boolean;
+  private isShuttingDown: boolean;
 
   constructor(logger: Logger) {
     this.logger = logger;
     this.handlers = [];
     this.signals = ['SIGINT', 'SIGTERM'];
+    this.isRegistered = false;
+    this.isShuttingDown = false;
   }
 
   onShutdown(handler: ShutdownHandler): void {
-    this.handlers.push(handler);
+    if (!this.handlers.includes(handler)) {
+      this.handlers.push(handler);
+    }
   }
 
   register(): void {
-    const shutdown = async (signal: string) => {
+    if (this.isRegistered) return;
+    this.isRegistered = true;
+
+    const shutdown = async (signal: NodeJS.Signals) => {
+      if (this.isShuttingDown) return;
+      this.isShuttingDown = true;
       this.logger.info(`\nシャットダウンシグナルを受信: ${signal}`);
       try {
         for (const handler of this.handlers) {
@@ -33,7 +44,7 @@ export class ShutdownManager {
     };
 
     for (const signal of this.signals) {
-      process.on(signal, () => shutdown(signal));
+      process.once(signal, () => void shutdown(signal));
     }
   }
 }

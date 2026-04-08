@@ -1,4 +1,5 @@
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+const LOG_LEVELS: LogLevel[] = ['debug', 'info', 'warn', 'error'];
 
 interface LoggerOptions {
   level?: LogLevel;
@@ -12,7 +13,8 @@ export class Logger {
 
   constructor(name: string, options: LoggerOptions = {}) {
     this.name = name;
-    this.level = (options.level ?? (process.env.LOG_LEVEL as LogLevel)) ?? 'info';
+    const candidate = options.level ?? process.env.LOG_LEVEL;
+    this.level = LOG_LEVELS.includes(candidate as LogLevel) ? (candidate as LogLevel) : 'info';
     this.timestamp = options.timestamp !== false;
   }
 
@@ -23,8 +25,7 @@ export class Logger {
   }
 
   private _shouldLog(level: LogLevel): boolean {
-    const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
-    return levels.indexOf(level) >= levels.indexOf(this.level);
+    return LOG_LEVELS.indexOf(level) >= LOG_LEVELS.indexOf(this.level);
   }
 
   debug(...args: unknown[]): void {

@@ -78,7 +78,7 @@ setupMyFeature(client, logger);
 
 ## ファイル構成
 
-```
+```text
 discord-bots/
 ├── package.json               # npm workspaces 設定
 ├── tsconfig.base.json         # TypeScript 共通設定

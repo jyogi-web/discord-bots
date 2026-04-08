@@ -3,7 +3,7 @@
 ## 前提条件
 
 - Node.js 24以上
-- Docker または Podman
+- Docker
 - Discord Bot Token
 
 ---
@@ -31,7 +31,6 @@ FORWARD_CHANNEL_ID=your_channel_id_here
 
 # 任意（デフォルト値あり）
 TARGET_EMOJI_NAME=kawaii
-TEXT_GACHA_URL=http://text-gacha:8080
 NODE_ENV=production
 LOG_LEVEL=info
 ```
@@ -45,7 +44,7 @@ LOG_LEVEL=info
 
 ## 起動
 
-### 本番環境（Docker/Podman）
+### 本番環境（Docker）
 
 ```bash
 # ビルドして起動（初回またはコード変更後）

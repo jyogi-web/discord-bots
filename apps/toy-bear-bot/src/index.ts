@@ -1,6 +1,6 @@
 import { createLogger, createShutdownManager } from '@discord-bots/shared';
 import { createDiscordClient, setupErrorHandlers } from '@discord-bots/discord-api';
-import { GatewayIntentBits } from 'discord.js';
+import { GatewayIntentBits, Partials } from 'discord.js';
 import { config } from './config.js';
 import { setupKawaii } from './features/kawaii.js';
 import { setupEyesLips } from './features/eyes-lips.js';
@@ -15,6 +15,7 @@ const client = createDiscordClient({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessageReactions,
   ],
+  partials: [Partials.Message, Partials.Reaction, Partials.Channel],
 });
 
 setupErrorHandlers(client, logger);
