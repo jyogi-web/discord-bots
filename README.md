@@ -20,8 +20,9 @@ discord-bots/
 ├── apps/
 │   └── toy-bear-bot/          # 統合Bot（TypeScript）
 │       ├── src/
-│       │   ├── index.ts       # エントリーポイント
-│       │   ├── config.ts      # 環境変数管理
+│       │   ├── index.ts           # エントリーポイント
+│       │   ├── config.ts          # 環境変数管理
+│       │   ├── deploy-commands.ts # スラッシュコマンド登録
 │       │   └── features/
 │       │       ├── kawaii.ts  # kawaii転送機能
 │       │       ├── eyes-lips.ts # eyes-lips機能
@@ -41,8 +42,10 @@ discord-bots/
 
 ```bash
 cp apps/toy-bear-bot/.env.example apps/toy-bear-bot/.env
-# .env を編集して DISCORD_TOKEN と FORWARD_CHANNEL_ID を設定
+# .env を編集して DISCORD_TOKEN、CLIENT_ID、FORWARD_CHANNEL_ID を設定
 ```
+
+`CLIENT_ID` は Discord Developer Portal → アプリ選択 → **Application ID** で確認できます。
 
 ### 2. 起動
 
@@ -54,6 +57,15 @@ docker compose up -d --build
 # Podman
 podman compose down
 podman compose up -d --build
+```
+
+> **スラッシュコマンドの登録はBot起動時に自動で行われます。**  
+> グローバル登録のため、Discord全体への反映まで最大1時間かかります。
+
+### 手動でコマンドを登録する場合
+
+```bash
+pnpm --filter @discord-bots/toy-bear-bot deploy
 ```
 
 ### 3. ログ確認

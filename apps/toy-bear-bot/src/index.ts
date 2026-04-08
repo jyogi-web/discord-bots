@@ -5,6 +5,7 @@ import { config } from './config.js';
 import { setupKawaii } from './features/kawaii.js';
 import { setupEyesLips } from './features/eyes-lips.js';
 import { setupGacha } from './features/gacha.js';
+import { registerCommands } from './deploy-commands.js';
 
 const logger = createLogger('toy-bear-bot');
 
@@ -20,9 +21,10 @@ const client = createDiscordClient({
 
 setupErrorHandlers(client, logger);
 
-client.once('clientReady', () => {
+client.once('clientReady', async () => {
   logger.success(`${client.user!.tag} としてログインしました`);
   logger.info(`転送先チャンネルID: ${config.FORWARD_CHANNEL_ID}`);
+  await registerCommands(logger);
 });
 
 setupKawaii(client, logger);
