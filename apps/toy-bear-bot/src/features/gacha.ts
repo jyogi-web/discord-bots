@@ -83,6 +83,7 @@ export function setupGacha(client: Client, logger: Logger): void {
     const shuffled = shuffleChars();
     const normalMatches = countMatches(shuffled, TARGET_CHARS);
 
+    // 特殊な判定結果の処理
     if (isAllCorrect(shuffled)) {
       // 全部揃った！
       const data = loadData();
@@ -92,11 +93,13 @@ export function setupGacha(client: Client, logger: Logger): void {
 
       const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
       await interaction.editReply(`${jyogiLine}\nあなたが**${rank}人目**の情報技術研究部を揃えた人です`);
+      logger.info(`ユーザー ${interaction.user.tag} が全て揃えました！順位: ${rank}`);
 
     } else if (isAllReversed(shuffled)) {
       // 逆順に揃った！
       const reversedText = REVERSED_CHARS.join('');
       await interaction.editReply(`\`\`\`\n${reversedText}\n\`\`\`\n逆順で揃えてしまった...`);
+      logger.info(`ユーザー ${interaction.user.tag} が逆順で揃えました！`);
 
     } else {
       // 通常結果
@@ -105,6 +108,7 @@ export function setupGacha(client: Client, logger: Logger): void {
       // 5文字一致でスタンプ送信
       if (normalMatches === 5 && interaction.channel?.isSendable()) {
         await interaction.channel.send({ stickers: [FIVE_MATCH_STICKER_ID] });
+        logger.info(`ユーザー ${interaction.user.tag} が5文字一致しました！`);
       }
     }
   });
