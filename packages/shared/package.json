@@ -3,12 +3,29 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Shared logic for Discord bots",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.js",
-    "./logger": "./logger/index.js",
-    "./config": "./config/index.js",
-    "./lifecycle": "./lifecycle/shutdown.js"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./logger": {
+      "import": "./dist/logger/index.js",
+      "types": "./dist/logger/index.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
+    },
+    "./lifecycle": {
+      "import": "./dist/lifecycle/shutdown.js",
+      "types": "./dist/lifecycle/shutdown.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
   },
   "engines": {
     "node": ">=24.0.0"

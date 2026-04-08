@@ -3,6 +3,14 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "bots/*"
-  ]
+    "bots/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "prepare": "npm run build -w packages/shared && npm run build -w packages/discord-api"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  }
 }

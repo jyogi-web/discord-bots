@@ -1,92 +1,20 @@
 version: '3.8'
 
-# 全てのDiscord Botを一括管理
 services:
-  # Eyes-Lips Bot - :eyes: に反応するBot
-  eyes-lips-bot:
+  # toy-bear-bot - じょぎ用統合Bot（kawaii転送 / eyes-lips / gacha）
+  toy-bear-bot:
     build:
       context: .
-      dockerfile: bots/eyes-lips-bot/Containerfile
+      dockerfile: apps/toy-bear-bot/Containerfile
       target: production
-    container_name: eyes-lips-bot
+    container_name: toy-bear-bot
     restart: unless-stopped
     environment:
       - NODE_ENV=production
     env_file:
-      - bots/eyes-lips-bot/.env
+      - apps/toy-bear-bot/.env
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    networks:
-      - discord-bots
-
-  # text-gacha - Haskellテキストシャッフルサービス
-  text-gacha:
-    build:
-      context: services/text-gacha
-      dockerfile: Containerfile
-      target: production
-    container_name: text-gacha
-    restart: unless-stopped
-    environment:
-      - PORT=8080
-    expose:
-      - "8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 5s
-      start_period: 15s
-      retries: 3
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - discord-bots
-
-  # Kawaii Bot - :kawaii: リアクションでメッセージ転送 / /gacha コマンド
-  kawaii-bot:
-    build:
-      context: .
-      dockerfile: bots/kawaii-bot/Containerfile
-      target: production
-    container_name: kawaii-bot
-    restart: unless-stopped
-    depends_on:
-      - text-gacha
-    environment:
-      - NODE_ENV=production
-      - TEXT_GACHA_URL=http://text-gacha:8080
-    env_file:
-      - bots/kawaii-bot/.env
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - discord-bots
-
-  # 将来的に追加するボットはここに記述
-  # music-bot:
-  #   build:
-  #     context: .
-  #     dockerfile: bots/music-bot/Containerfile
-  #     target: production
-  #   container_name: music-bot
-  #   restart: unless-stopped
-  #   environment:
-  #     - NODE_ENV=production
-  #   env_file:
-  #     - bots/music-bot/.env
-  #   networks:
-  #     - discord-bots
-
-# 共通ネットワーク（将来的にBot間通信が必要な場合に使用）
-networks:
-  discord-bots:
-    driver: bridge

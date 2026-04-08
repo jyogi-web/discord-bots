@@ -1,0 +1,21 @@
+{
+  "name": "@discord-bots/toy-bear-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "じょぎ用統合Discordボット",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "deploy": "tsc && node dist/deploy-commands.js"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "@discord-bots/discord-api": "*",
+    "@discord-bots/shared": "*",
+    "discord.js": "^14.16.0"
+  }
+}

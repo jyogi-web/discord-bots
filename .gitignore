@@ -1,5 +1,18 @@
-.claude 
+.claude
 node_modules/
 
+# TypeScript ビルド成果物
+dist/
+*.js.map
+*.d.ts.map
+
+# Haskell ビルド成果物
 dist-newstyle/
+
+# 環境変数
+.env
+.env.*
+!.env.example
+
+# Nix
 .direnv/
