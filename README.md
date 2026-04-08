@@ -48,9 +48,11 @@ cp apps/toy-bear-bot/.env.example apps/toy-bear-bot/.env
 
 ```bash
 # Docker
+docker compose down
 docker compose up -d --build
 
 # Podman
+podman compose down
 podman compose up -d --build
 ```
 
