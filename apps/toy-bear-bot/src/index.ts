@@ -5,6 +5,7 @@ import { config } from './config.js';
 import { setupKawaii } from './features/kawaii.js';
 import { setupEyesLips } from './features/eyes-lips.js';
 import { setupGacha } from './features/gacha.js';
+import { setupSj } from './features/sj.js';
 import { registerCommands } from './deploy-commands.js';
 
 const logger = createLogger('toy-bear-bot');
@@ -30,6 +31,7 @@ client.once('clientReady', async () => {
 setupKawaii(client, logger);
 setupEyesLips(client, logger);
 setupGacha(client, logger);
+setupSj(client, logger);
 
 const shutdownManager = createShutdownManager(logger);
 shutdownManager.onShutdown(async () => {

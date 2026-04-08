@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const TARGET_CHARS = '情報技術研究部'.split('');
 const REVERSED_CHARS = [...TARGET_CHARS].reverse();
 const JYOGI_EMOJI = ':jyogi2014:';
-const FIVE_MATCH_STICKER_ID = '1491081864323141793';
+export const FIVE_MATCH_STICKER_ID = '1491081864323141793';
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'data');
 const RECORDS_FILE = join(DATA_DIR, 'gacha-records.json');
 

@@ -7,6 +7,10 @@ const COMMANDS = [
     name: 'gacha',
     description: '情報技術研究部の文字をシャッフルします',
   },
+  {
+    name: 'sj',
+    description: 'ステッカーを送信します（テスト用）',
+  },
 ];
 
 export async function registerCommands(logger: Logger): Promise<void> {
