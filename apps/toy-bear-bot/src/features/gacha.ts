@@ -8,6 +8,7 @@ const TARGET_CHARS = '情報技術研究部'.split('');
 const REVERSED_CHARS = [...TARGET_CHARS].reverse();
 const JYOGI_EMOJI = ':jyogi2014:';
 const FIVE_MATCH_STICKER_ID = '1491081864323141793';
+const ALL_CORRECT_STICKER_ID = '1411357962567548969';
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'data');
 const RECORDS_FILE = join(DATA_DIR, 'gacha-records.json');
 
@@ -92,7 +93,10 @@ export function setupGacha(client: Client, logger: Logger): void {
       saveRecord({ username: interaction.user.username, userId: interaction.user.id, timestamp, rank });
 
       const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
-      await interaction.editReply(`${jyogiLine}\nあなたが**${rank}人目**の情報技術研究部を揃えた人です`);
+      await interaction.editReply(`${jyogiLine}\nあなたが**${rank}人目**の情報技術研究部を揃えた人です\nおめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
+      if (interaction.channel?.isSendable()) {
+        await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
+      }
       logger.info(`ユーザー ${interaction.user.tag} が全て揃えました！順位: ${rank}`);
 
     } else if (isAllReversed(shuffled)) {
