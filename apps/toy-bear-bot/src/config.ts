@@ -6,8 +6,13 @@ const envConfig = createConfig({
     NODE_ENV: 'development',
     LOG_LEVEL: 'info',
     TARGET_EMOJI_NAME: 'kawaii',
+    FEATURE_KAWAII: 'true',
+    FEATURE_EYES_LIPS: 'true',
+    FEATURE_GACHA: 'true',
   },
 });
+
+const parseFeatureFlag = (value: string): boolean => value.toLowerCase() !== 'false' && value !== '0';
 
 export const config = {
   DISCORD_TOKEN: envConfig.DISCORD_TOKEN,
@@ -15,6 +20,11 @@ export const config = {
   FORWARD_CHANNEL_ID: envConfig.FORWARD_CHANNEL_ID,
   NODE_ENV: envConfig.NODE_ENV,
   LOG_LEVEL: envConfig.LOG_LEVEL,
+  features: {
+    kawaii: parseFeatureFlag(envConfig.FEATURE_KAWAII),
+    eyesLips: parseFeatureFlag(envConfig.FEATURE_EYES_LIPS),
+    gacha: parseFeatureFlag(envConfig.FEATURE_GACHA),
+  },
   kawaii: {
     emojiName: envConfig.TARGET_EMOJI_NAME,
   },

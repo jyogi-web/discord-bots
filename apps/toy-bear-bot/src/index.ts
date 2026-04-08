@@ -27,9 +27,26 @@ client.once('clientReady', async () => {
   await registerCommands(logger);
 });
 
-setupKawaii(client, logger);
-setupEyesLips(client, logger);
-setupGacha(client, logger);
+if (config.features.kawaii) {
+  setupKawaii(client, logger);
+  logger.info('Feature: kawaii 有効');
+} else {
+  logger.info('Feature: kawaii 無効 (FEATURE_KAWAII=false)');
+}
+
+if (config.features.eyesLips) {
+  setupEyesLips(client, logger);
+  logger.info('Feature: eyes-lips 有効');
+} else {
+  logger.info('Feature: eyes-lips 無効 (FEATURE_EYES_LIPS=false)');
+}
+
+if (config.features.gacha) {
+  setupGacha(client, logger);
+  logger.info('Feature: gacha 有効');
+} else {
+  logger.info('Feature: gacha 無効 (FEATURE_GACHA=false)');
+}
 
 const shutdownManager = createShutdownManager(logger);
 shutdownManager.onShutdown(async () => {
