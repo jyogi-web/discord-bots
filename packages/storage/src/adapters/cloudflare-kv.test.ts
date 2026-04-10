@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CloudflareKVAdapter } from './cloudflare-kv.js';
-import { runStorageContractTests } from './storage-contract.test.js';
+import { runStorageContractTests } from './storage-contract-tests.js';
 
 const mockGet = vi.fn();
 const mockUpdate = vi.fn();
