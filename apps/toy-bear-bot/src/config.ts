@@ -1,7 +1,7 @@
 import { createConfig } from '@discord-bots/shared';
 
 const envConfig = createConfig({
-  required: ['DISCORD_TOKEN', 'FORWARD_CHANNEL_ID', 'CLIENT_ID'],
+  required: ['DISCORD_TOKEN', 'FORWARD_CHANNEL_ID', 'CLIENT_ID', 'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'KV_NAMESPACE_ID'],
   optional: {
     NODE_ENV: 'development',
     LOG_LEVEL: 'info',
@@ -20,6 +20,11 @@ export const config = {
   FORWARD_CHANNEL_ID: envConfig.FORWARD_CHANNEL_ID,
   NODE_ENV: envConfig.NODE_ENV,
   LOG_LEVEL: envConfig.LOG_LEVEL,
+  cloudflare: {
+    apiToken: envConfig.CLOUDFLARE_API_TOKEN,
+    accountId: envConfig.CLOUDFLARE_ACCOUNT_ID,
+    kvNamespaceId: envConfig.KV_NAMESPACE_ID,
+  },
   features: {
     kawaii: parseFeatureFlag(envConfig.FEATURE_KAWAII),
     eyesLips: parseFeatureFlag(envConfig.FEATURE_EYES_LIPS),

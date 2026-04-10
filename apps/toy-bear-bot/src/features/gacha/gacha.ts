@@ -1,8 +1,6 @@
 import { EmbedBuilder, type Client } from 'discord.js';
 import type { Logger } from '@discord-bots/shared';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import type { StorageAdapter } from '@discord-bots/storage';
 import { GACHA_DEBUG, DEBUG_SCENARIO_ORDER, type DebugScenario } from './debug.js';
 
 const TARGET_CHARS = '情報技術研究部'.split('');
@@ -10,8 +8,9 @@ const REVERSED_CHARS = [...TARGET_CHARS].reverse();
 const JYOGI_EMOJI = ':jyogi2014:';
 const FIVE_MATCH_STICKER_ID = '1491081864323141793';
 const ALL_CORRECT_STICKER_ID = '1411357962567548969';
-const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'data');
-const RECORDS_FILE = join(DATA_DIR, 'gacha-records.json');
+
+const KV_WINNER_COUNT = 'gacha:winner:count';
+const kvWinnerKey = (rank: number) => `gacha:winner:${rank}`;
 
 interface GachaRecord {
   username: string;
@@ -20,29 +19,15 @@ interface GachaRecord {
   rank: number;
 }
 
-interface GachaData {
-  records: GachaRecord[];
+async function getWinnerCount(storage: StorageAdapter): Promise<number> {
+  const raw = await storage.get(KV_WINNER_COUNT);
+  if (raw === null) return 0;
+  return parseInt(raw, 10);
 }
 
-function loadData(): GachaData {
-  if (!existsSync(DATA_DIR)) {
-    mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!existsSync(RECORDS_FILE)) {
-    return { records: [] };
-  }
-  try {
-    const raw = readFileSync(RECORDS_FILE, 'utf-8');
-    return JSON.parse(raw) as GachaData;
-  } catch {
-    return { records: [] };
-  }
-}
-
-function saveRecord(record: GachaRecord): void {
-  const data = loadData();
-  data.records.push(record);
-  writeFileSync(RECORDS_FILE, JSON.stringify(data, null, 2), 'utf-8');
+async function saveWinner(storage: StorageAdapter, record: GachaRecord): Promise<void> {
+  await storage.put(kvWinnerKey(record.rank), JSON.stringify(record));
+  await storage.put(KV_WINNER_COUNT, String(record.rank));
 }
 
 function shuffleChars(): string[] {
@@ -128,7 +113,7 @@ function buildShuffledForScenario(scenario: DebugScenario): string[] {
   }
 }
 
-export function setupGacha(client: Client, logger: Logger): void {
+export function setupGacha(client: Client, logger: Logger, storage: StorageAdapter): void {
   let debugIndex = 0;
 
   client.on('interactionCreate', async (interaction) => {
@@ -161,10 +146,10 @@ export function setupGacha(client: Client, logger: Logger): void {
         }
         logger.info(`[gacha debug] ユーザー ${interaction.user.tag} が全て揃えました（記録なし）`);
       } else {
-        const data = loadData();
-        const rank = data.records.length + 1;
+        const count = await getWinnerCount(storage);
+        const rank = count + 1;
         const timestamp = new Date().toISOString();
-        saveRecord({ username: interaction.user.username, userId: interaction.user.id, timestamp, rank });
+        await saveWinner(storage, { username: interaction.user.username, userId: interaction.user.id, timestamp, rank });
 
         const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
         await interaction.editReply(`${jyogiLine}\nあなたが**${rank}人目**の情報技術研究部を揃えた人です\nおめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
