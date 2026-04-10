@@ -1,15 +1,26 @@
 {
   "name": "discord-bots",
   "private": true,
+  "packageManager": "npm@11.9.0",
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "scripts": {
-    "prepare": "npm run build -w packages/shared && npm run build -w packages/discord-api"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "typecheck": "turbo typecheck",
+    "test": "vitest",
+    "test:run": "turbo test:run",
+    "prepare": "turbo build --filter=./packages/*"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260409.1",
+    "tsdown": "^0.21.7",
+    "tsx": "^4.21.0",
+    "turbo": "^2.9.5",
     "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "vitest": "^4.1.4"
   }
 }

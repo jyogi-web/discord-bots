@@ -1,5 +1,6 @@
 .claude
 node_modules/
+.turbo/
 
 # TypeScript ビルド成果物
 dist/
