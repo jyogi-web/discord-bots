@@ -4,7 +4,7 @@ import { GatewayIntentBits, Partials } from 'discord.js';
 import { config } from './config.js';
 import { setupKawaii } from './features/kawaii.js';
 import { setupEyesLips } from './features/eyes-lips.js';
-import { setupGacha } from './features/gacha.js';
+import { setupGacha } from './features/gacha/gacha.js';
 import { registerCommands } from './deploy-commands.js';
 
 const logger = createLogger('toy-bear-bot');
