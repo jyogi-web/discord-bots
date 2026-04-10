@@ -2,7 +2,7 @@
   "name": "@discord-bots/toy-bear-bot",
   "version": "1.0.0",
   "type": "module",
-  "description": "じょぎ用統合Discordボット",
+  "description": "統合Discordボット",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
