@@ -135,7 +135,11 @@ export function setupGacha(client: Client, logger: Logger): void {
     if (!interaction.isChatInputCommand()) return;
     if (interaction.commandName !== 'gacha') return;
 
-    await interaction.deferReply();
+    try {
+      await interaction.deferReply();
+    } catch {
+      return;
+    }
 
     let shuffled: string[];
     if (GACHA_DEBUG) {
@@ -159,7 +163,7 @@ export function setupGacha(client: Client, logger: Logger): void {
         if (interaction.channel?.isSendable()) {
           await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
         }
-        logger.info(`[gacha debug] ユーザー ${interaction.user.tag} が全て揃えました（記録なし）`);
+        logger.info(`[gacha debug] ユーザー ${interaction.user.username} が全て揃えました（記録なし）`);
       } else {
         const data = loadData();
         const rank = data.records.length + 1;
@@ -171,14 +175,14 @@ export function setupGacha(client: Client, logger: Logger): void {
         if (interaction.channel?.isSendable()) {
           await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
         }
-        logger.info(`ユーザー ${interaction.user.tag} が全て揃えました！順位: ${rank}`);
+        logger.info(`ユーザー ${interaction.user.username} が全て揃えました！順位: ${rank}`);
       }
 
     } else if (isAllReversed(shuffled)) {
       // 逆順に揃った！
       const reversedText = REVERSED_CHARS.join('');
       await interaction.editReply(`\`\`\`\n${reversedText}\n\`\`\`\n逆順で揃えてしまった...`);
-      logger.info(`ユーザー ${interaction.user.tag} が逆順で揃えました！`);
+      logger.info(`ユーザー ${interaction.user.username} が逆順で揃えました！`);
 
     } else {
       // 通常結果
@@ -188,7 +192,7 @@ export function setupGacha(client: Client, logger: Logger): void {
       // 5文字一致でスタンプ送信
       if (normalMatches === 5 && interaction.channel?.isSendable()) {
         await interaction.channel.send({ stickers: [FIVE_MATCH_STICKER_ID] });
-        logger.info(`ユーザー ${interaction.user.tag} が5文字一致しました！`);
+        logger.info(`ユーザー ${interaction.user.username} が5文字一致しました！`);
       }
     }
   });
