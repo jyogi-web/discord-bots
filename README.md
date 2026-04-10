@@ -2,7 +2,7 @@
 
 じょぎ用の統合 Discord Bot。1つの Bot アカウントで複数の機能を提供します。
 
-[![](https://img.shields.io/badge/Discord-add%20bot-green?logo=discord)](https://discord.com/oauth2/authorize?client_id=1467536144131555459&scope=bot&permissions=8515702525131840)
+[![DiscordにBotを追加](https://img.shields.io/badge/Discord-add%20bot-green?logo=discord)](https://discord.com/oauth2/authorize?client_id=1467536144131555459&scope=bot&permissions=8515702525131840)
 
 ## 機能
 

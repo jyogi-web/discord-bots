@@ -9,6 +9,18 @@
     ".": {
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.mts"
+    },
+    "./logger": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    },
+    "./config": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    },
+    "./lifecycle": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
     }
   },
   "scripts": {
