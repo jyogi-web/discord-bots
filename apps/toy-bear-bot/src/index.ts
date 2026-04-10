@@ -1,5 +1,6 @@
 import { createLogger, createShutdownManager } from '@discord-bots/shared';
 import { createDiscordClient, setupErrorHandlers } from '@discord-bots/discord-api';
+import { CloudflareKVAdapter } from '@discord-bots/storage';
 import { GatewayIntentBits, Partials } from 'discord.js';
 import { config } from './config.js';
 import { setupKawaii } from './features/kawaii.js';
@@ -42,7 +43,12 @@ if (config.features.eyesLips) {
 }
 
 if (config.features.gacha) {
-  setupGacha(client, logger);
+  const storage = new CloudflareKVAdapter(
+    config.cloudflare.apiToken,
+    config.cloudflare.accountId,
+    config.cloudflare.kvNamespaceId,
+  );
+  setupGacha(client, logger, storage);
   logger.info('Feature: gacha 有効');
 } else {
   logger.info('Feature: gacha 無効 (FEATURE_GACHA=false)');
