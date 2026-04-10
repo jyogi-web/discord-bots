@@ -7,10 +7,16 @@
     "apps/*"
   ],
   "scripts": {
-    "prepare": "npm run build -w packages/shared && npm run build -w packages/discord-api"
+    "prepare": "npm run build -w packages/shared && npm run build -w packages/discord-api",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260409.1",
+    "tsdown": "^0.21.7",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "vitest": "^4.1.4"
   }
 }
