@@ -1,6 +1,6 @@
 import { EmbedBuilder, type Client } from 'discord.js';
 import type { Logger } from '@discord-bots/shared';
-import type { StorageAdapter } from '@discord-bots/storage';
+import type { StorageAdapter, KVLogSink } from '@discord-bots/storage';
 import { GACHA_DEBUG, DEBUG_SCENARIO_ORDER, type DebugScenario } from './debug.js';
 
 const TARGET_CHARS = '情報技術研究部'.split('');
@@ -114,7 +114,7 @@ function buildShuffledForScenario(scenario: DebugScenario): string[] {
   }
 }
 
-export function setupGacha(client: Client, logger: Logger, storage: StorageAdapter): void {
+export function setupGacha(client: Client, logger: Logger, storage: StorageAdapter, logSink?: KVLogSink): void {
   let debugIndex = 0;
 
   client.on('interactionCreate', async (interaction) => {
@@ -159,6 +159,7 @@ export function setupGacha(client: Client, logger: Logger, storage: StorageAdapt
             await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
           }
           logger.info(`ユーザー ${interaction.user.tag} が全て揃えました！順位: ${rank}`);
+          logSink?.record({ feature: 'gacha', action: 'all_correct', user: interaction.user.username, extra: { rank: String(rank) } });
         } catch (err) {
           logger.error(`ガチャ記録の保存に失敗しました: ${interaction.user.tag}`, err);
           await interaction.editReply('おめでとう！全て揃えましたが、記録の保存に失敗しました。もう一度お試しください。');
@@ -171,6 +172,7 @@ export function setupGacha(client: Client, logger: Logger, storage: StorageAdapt
       const reversedText = REVERSED_CHARS.join('');
       await interaction.editReply(`\`\`\`\n${reversedText}\n\`\`\`\n逆順で揃えてしまった...`);
       logger.info(`ユーザー ${interaction.user.tag} が逆順で揃えました！`);
+      logSink?.record({ feature: 'gacha', action: 'reversed', user: interaction.user.username });
 
     } else {
       // 通常結果
@@ -181,6 +183,7 @@ export function setupGacha(client: Client, logger: Logger, storage: StorageAdapt
       if (normalMatches === 5 && interaction.channel?.isSendable()) {
         await interaction.channel.send({ stickers: [FIVE_MATCH_STICKER_ID] });
         logger.info(`ユーザー ${interaction.user.tag} が5文字一致しました！`);
+        logSink?.record({ feature: 'gacha', action: 'five_match', user: interaction.user.username });
       }
     }
   });

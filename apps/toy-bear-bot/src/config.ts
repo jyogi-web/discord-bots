@@ -1,17 +1,13 @@
 import { createConfig } from '@discord-bots/shared';
 
-const isGachaEnabled =
-  (process.env.FEATURE_GACHA ?? 'true').toLowerCase() !== 'false' &&
-  (process.env.FEATURE_GACHA ?? 'true') !== '0';
-
 const envConfig = createConfig({
   required: [
     'DISCORD_TOKEN',
     'FORWARD_CHANNEL_ID',
     'CLIENT_ID',
-    ...(isGachaEnabled
-      ? ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'KV_NAMESPACE_ID']
-      : []),
+    'CLOUDFLARE_API_TOKEN',
+    'CLOUDFLARE_ACCOUNT_ID',
+    'KV_NAMESPACE_ID',
   ],
   optional: {
     NODE_ENV: 'development',
@@ -20,9 +16,6 @@ const envConfig = createConfig({
     FEATURE_KAWAII: 'true',
     FEATURE_EYES_LIPS: 'true',
     FEATURE_GACHA: 'true',
-    ...(!isGachaEnabled
-      ? { CLOUDFLARE_API_TOKEN: '', CLOUDFLARE_ACCOUNT_ID: '', KV_NAMESPACE_ID: '' }
-      : {}),
   },
 });
 
