@@ -16,11 +16,15 @@ export function createLogger(name: string, options: LoggerOptions = {}): winston
       ? (process.env.LOG_LEVEL as LogLevel)
       : 'info');
 
+  // ロガーレベルのフォーマット: 全 Transport に適用される正規化処理
+  const sharedFormat = winston.format.combine(
+    winston.format.errors({ stack: true }),
+    winston.format.splat(),
+  );
+
   const transports: winston.transport[] = [
     new winston.transports.Console({
       format: winston.format.combine(
-        winston.format.errors({ stack: true }),
-        winston.format.splat(),
         winston.format.colorize(),
         winston.format.printf(({ level, message, stack, ...meta }) => {
           const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
@@ -52,6 +56,7 @@ export function createLogger(name: string, options: LoggerOptions = {}): winston
 
   return winston.createLogger({
     level,
+    format: sharedFormat,
     defaultMeta: { bot: name },
     transports,
   });
