@@ -14,7 +14,7 @@ export async function registerCommands(logger: Logger): Promise<void> {
   const rest = new REST().setToken(config.DISCORD_TOKEN);
   logger.info('グローバルスラッシュコマンドを登録中...');
   await rest.put(Routes.applicationCommands(config.CLIENT_ID), { body: COMMANDS });
-  logger.success('グローバルスラッシュコマンドの登録が完了しました（反映まで最大1時間かかります）');
+  logger.info('グローバルスラッシュコマンドの登録が完了しました（反映まで最大1時間かかります）');
 }
 
 // 手動実行用: `node dist/deploy-commands.js` で直接実行された場合のみ動作

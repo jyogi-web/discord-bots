@@ -1,9 +1,8 @@
 import { EmbedBuilder, type Client, type MessageReaction, type User, type GuildTextBasedChannel } from 'discord.js';
 import type { Logger } from '@discord-bots/shared';
-import type { KVLogSink } from '@discord-bots/storage';
 import { config } from '../config.js';
 
-export function setupKawaii(client: Client, logger: Logger, logSink?: KVLogSink): void {
+export function setupKawaii(client: Client, logger: Logger): void {
   client.on('messageReactionAdd', async (reaction, user) => {
     try {
       if (user.bot) return;
@@ -53,17 +52,12 @@ export function setupKawaii(client: Client, logger: Logger, logSink?: KVLogSink)
       const embed = createMessageEmbed(reaction as MessageReaction, user as User);
       await guildChannel.send({ embeds: [embed] });
 
-      logger.info(
-        'メッセージを転送しました',
-        `リアクション: ${reaction.emoji.name}`,
-        `元メッセージID: ${reaction.message.id}`,
-        `送信者: ${(user as User).tag}`
-      );
-      logSink?.record({
+      logger.info('kawaii: メッセージを転送しました', {
         feature: 'kawaii',
         action: 'forward',
         user: (user as User).username,
-        extra: { messageId: reaction.message.id },
+        messageId: reaction.message.id,
+        emoji: reaction.emoji.name,
       });
     } catch (error) {
       logger.error('メッセージ転送エラー:', error);

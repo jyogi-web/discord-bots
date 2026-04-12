@@ -1,9 +1,8 @@
 import type { Client } from 'discord.js';
 import type { Logger } from '@discord-bots/shared';
-import type { KVLogSink } from '@discord-bots/storage';
 import { config } from '../config.js';
 
-export function setupEyesLips(client: Client, logger: Logger, logSink?: KVLogSink): void {
+export function setupEyesLips(client: Client, logger: Logger): void {
   client.on('messageCreate', async (message) => {
     try {
       if (message.author.bot) return;
@@ -18,16 +17,12 @@ export function setupEyesLips(client: Client, logger: Logger, logSink?: KVLogSin
 
       await message.react(randomEmoji);
 
-      logger.info(
-        `👀 → ${randomEmoji} メッセージにリアクションしました`,
-        `ID: ${message.id}`,
-        `チャンネル: #${'name' in message.channel ? message.channel.name : 'DM'}`
-      );
-      logSink?.record({
+      logger.info('eyes-lips: リアクションしました', {
         feature: 'eyes-lips',
         action: 'react',
         user: message.author.username,
-        extra: { emoji: randomEmoji },
+        emoji: randomEmoji,
+        messageId: message.id,
       });
     } catch (error) {
       logger.error('メッセージ処理エラー:', error);

@@ -17,7 +17,6 @@
   "dependencies": {
     "@discord-bots/discord-api": "*",
     "@discord-bots/shared": "*",
-    "@discord-bots/storage": "*",
     "discord.js": "^14.16.0"
   }
 }

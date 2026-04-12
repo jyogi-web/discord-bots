@@ -1,6 +1,5 @@
 import { createLogger, createShutdownManager } from '@discord-bots/shared';
 import { createDiscordClient, setupErrorHandlers } from '@discord-bots/discord-api';
-import { CloudflareKVAdapter, KVLogSink } from '@discord-bots/storage';
 import { GatewayIntentBits, Partials } from 'discord.js';
 import { config } from './config.js';
 import { setupKawaii } from './features/kawaii.js';
@@ -23,34 +22,27 @@ const client = createDiscordClient({
 setupErrorHandlers(client, logger);
 
 client.once('clientReady', async () => {
-  logger.success(`${client.user!.tag} としてログインしました`);
+  logger.info(`${client.user!.tag} としてログインしました`);
   logger.info(`転送先チャンネルID: ${config.FORWARD_CHANNEL_ID}`);
   await registerCommands(logger);
 });
 
-const storage = new CloudflareKVAdapter(
-  config.cloudflare.apiToken,
-  config.cloudflare.accountId,
-  config.cloudflare.kvNamespaceId,
-);
-const logSink = new KVLogSink(storage, 'toy-bear-bot');
-
 if (config.features.kawaii) {
-  setupKawaii(client, logger, logSink);
+  setupKawaii(client, logger);
   logger.info('Feature: kawaii 有効');
 } else {
   logger.info('Feature: kawaii 無効 (FEATURE_KAWAII=false)');
 }
 
 if (config.features.eyesLips) {
-  setupEyesLips(client, logger, logSink);
+  setupEyesLips(client, logger);
   logger.info('Feature: eyes-lips 有効');
 } else {
   logger.info('Feature: eyes-lips 無効 (FEATURE_EYES_LIPS=false)');
 }
 
 if (config.features.gacha) {
-  setupGacha(client, logger, storage, logSink);
+  setupGacha(client, logger);
   logger.info('Feature: gacha 有効');
 } else {
   logger.info('Feature: gacha 無効 (FEATURE_GACHA=false)');
@@ -59,7 +51,8 @@ if (config.features.gacha) {
 const shutdownManager = createShutdownManager(logger);
 shutdownManager.onShutdown(async () => {
   logger.info('Discord クライアントを停止中...');
-  await logSink.destroy();
+  logger.end(); // Axiom Transport のバッファをフラッシュ
+  await new Promise(resolve => setTimeout(resolve, 1000));
   await client.destroy();
 });
 shutdownManager.register();

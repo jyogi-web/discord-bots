@@ -1,6 +1,5 @@
 import { type Client } from 'discord.js';
 import type { Logger } from '@discord-bots/shared';
-import type { StorageAdapter, KVLogSink } from '@discord-bots/storage';
 import { GACHA_DEBUG, DEBUG_SCENARIO_ORDER, type DebugScenario } from './debug.js';
 
 const TARGET_CHARS = '情報技術研究部'.split('');
@@ -8,28 +7,6 @@ const REVERSED_CHARS = [...TARGET_CHARS].reverse();
 const JYOGI_EMOJI = ':jyogi2014:';
 const FIVE_MATCH_STICKER_ID = '1491081864323141793';
 const ALL_CORRECT_STICKER_ID = '1411357962567548969';
-
-const KV_WINNER_COUNT = 'gacha:winner:count';
-const kvWinnerKey = (rank: number) => `gacha:winner:${rank}`;
-
-interface GachaRecord {
-  username: string;
-  userId: string;
-  timestamp: string;
-  rank: number;
-}
-
-async function getWinnerCount(storage: StorageAdapter): Promise<number> {
-  const raw = await storage.get(KV_WINNER_COUNT);
-  if (raw === null) return 0;
-  const parsed = Number.parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
-}
-
-async function saveWinner(storage: StorageAdapter, record: GachaRecord): Promise<void> {
-  await storage.put(kvWinnerKey(record.rank), JSON.stringify(record));
-  await storage.put(KV_WINNER_COUNT, String(record.rank));
-}
 
 function shuffleChars(): string[] {
   const arr = [...TARGET_CHARS];
@@ -61,7 +38,6 @@ function formatResult(shuffled: string[]): string {
   });
   return `\`\`\`ansi\n${colored.join('')}\n\`\`\``;
 }
-
 
 // 指定したマッチ数になるように TARGET_CHARS を部分的に崩した配列を返す。
 // デバッグ用: 特定レアリティの演出を再現するため。
@@ -100,7 +76,7 @@ function buildShuffledForScenario(scenario: DebugScenario): string[] {
   }
 }
 
-export function setupGacha(client: Client, logger: Logger, storage: StorageAdapter, logSink?: KVLogSink): void {
+export function setupGacha(client: Client, logger: Logger): void {
   let debugIndex = 0;
 
   client.on('interactionCreate', async (interaction) => {
@@ -121,54 +97,39 @@ export function setupGacha(client: Client, logger: Logger, storage: StorageAdapt
 
     const normalMatches = countMatches(shuffled, TARGET_CHARS);
 
-    // 特殊な判定結果の処理
     if (isAllCorrect(shuffled)) {
-      // 全部揃った！
-      if (GACHA_DEBUG) {
-        // デバッグ時はランキングに記録しない
-        const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
-        await interaction.editReply(`${jyogiLine}\n[DEBUG] 全て揃えた演出\nおめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
-        if (interaction.channel?.isSendable()) {
-          await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
-        }
-        logger.info(`[gacha debug] ユーザー ${interaction.user.tag} が全て揃えました（記録なし）`);
-      } else {
-        try {
-          const count = await getWinnerCount(storage);
-          const rank = count + 1;
-          const timestamp = new Date().toISOString();
-          await saveWinner(storage, { username: interaction.user.username, userId: interaction.user.id, timestamp, rank });
-
-          const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
-          await interaction.editReply(`${jyogiLine}\nあなたが**${rank}人目**の情報技術研究部を揃えた人です\nおめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
-          if (interaction.channel?.isSendable()) {
-            await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
-          }
-          logger.info(`ユーザー ${interaction.user.tag} が全て揃えました！順位: ${rank}`);
-          logSink?.record({ feature: 'gacha', action: 'all_correct', user: interaction.user.username, extra: { rank: String(rank) } });
-        } catch (err) {
-          logger.error(`ガチャ記録の保存に失敗しました: ${interaction.user.tag}`, err);
-          await interaction.editReply('おめでとう！全て揃えましたが、記録の保存に失敗しました。もう一度お試しください。');
-          return;
-        }
+      const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
+      const debugPrefix = GACHA_DEBUG ? '[DEBUG] ' : '';
+      await interaction.editReply(`${jyogiLine}\n${debugPrefix}おめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
+      if (interaction.channel?.isSendable()) {
+        await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
       }
+      logger.info('gacha: 全て揃えた', {
+        feature: 'gacha',
+        action: 'all_correct',
+        user: interaction.user.username,
+        debug: GACHA_DEBUG,
+      });
 
     } else if (isAllReversed(shuffled)) {
-      // 逆順に揃った！
       const reversedText = REVERSED_CHARS.join('');
       await interaction.editReply(`\`\`\`\n${reversedText}\n\`\`\`\n逆順で揃えてしまった...`);
-      logger.info(`ユーザー ${interaction.user.tag} が逆順で揃えました！`);
-      logSink?.record({ feature: 'gacha', action: 'reversed', user: interaction.user.username });
+      logger.info('gacha: 逆順で揃えた', {
+        feature: 'gacha',
+        action: 'reversed',
+        user: interaction.user.username,
+      });
 
     } else {
-      // 通常結果
       await interaction.editReply(formatResult(shuffled));
 
-      // 5文字一致でスタンプ送信
       if (normalMatches === 5 && interaction.channel?.isSendable()) {
         await interaction.channel.send({ stickers: [FIVE_MATCH_STICKER_ID] });
-        logger.info(`ユーザー ${interaction.user.tag} が5文字一致しました！`);
-        logSink?.record({ feature: 'gacha', action: 'five_match', user: interaction.user.username });
+        logger.info('gacha: 5文字一致', {
+          feature: 'gacha',
+          action: 'five_match',
+          user: interaction.user.username,
+        });
       }
     }
   });
