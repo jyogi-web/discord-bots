@@ -20,3 +20,5 @@ dist-newstyle/
 
 # ガチャデータ（将来的に外部DBに移行予定）
 apps/*/data/
+
+.ds_store
