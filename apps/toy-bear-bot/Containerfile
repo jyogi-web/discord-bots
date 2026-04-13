@@ -2,19 +2,29 @@ FROM node:24-alpine AS base
 WORKDIR /app
 
 FROM base AS dependencies
-COPY package*.json ./
-COPY packages/shared/package*.json ./packages/shared/
-COPY packages/discord-api/package*.json ./packages/discord-api/
-COPY apps/toy-bear-bot/package*.json ./apps/toy-bear-bot/
-RUN npm ci --workspaces --omit=dev --ignore-scripts && \
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/discord-api/package.json ./packages/discord-api/
+COPY apps/toy-bear-bot/package.json ./apps/toy-bear-bot/
+RUN npm ci \
+    --workspace=packages/shared \
+    --workspace=packages/discord-api \
+    --workspace=apps/toy-bear-bot \
+    --omit=dev \
+    --ignore-scripts && \
     npm cache clean --force
 
 FROM base AS build
-COPY package*.json ./
-COPY packages/shared/package*.json ./packages/shared/
-COPY packages/discord-api/package*.json ./packages/discord-api/
-COPY apps/toy-bear-bot/package*.json ./apps/toy-bear-bot/
-RUN npm ci --ignore-scripts
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/discord-api/package.json ./packages/discord-api/
+COPY apps/toy-bear-bot/package.json ./apps/toy-bear-bot/
+RUN npm ci \
+    --workspace=packages/shared \
+    --workspace=packages/discord-api \
+    --workspace=apps/toy-bear-bot \
+    --include-workspace-root \
+    --ignore-scripts
 COPY packages ./packages
 COPY tsconfig.base.json ./
 COPY apps/toy-bear-bot ./apps/toy-bear-bot
@@ -23,15 +33,15 @@ RUN npm run build --workspace=packages/shared && \
     npm run build --workspace=apps/toy-bear-bot
 
 FROM base AS production
-USER node
 WORKDIR /app
+USER node
 
 COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build --chown=node:node /app/packages/discord-api/dist ./packages/discord-api/dist
 COPY --from=build --chown=node:node /app/apps/toy-bear-bot/dist ./apps/toy-bear-bot/dist
 
-COPY --chown=node:node package*.json ./
+COPY --chown=node:node package.json ./
 COPY --chown=node:node packages/shared/package.json ./packages/shared/
 COPY --chown=node:node packages/discord-api/package.json ./packages/discord-api/
 COPY --chown=node:node apps/toy-bear-bot/package.json ./apps/toy-bear-bot/
