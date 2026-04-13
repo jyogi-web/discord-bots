@@ -1,0 +1,33 @@
+# 依存関係（コンテナ内でインストール）
+node_modules/
+**/node_modules/
+
+# ビルド成果物（コンテナ内でビルド）
+dist/
+**/dist/
+
+# ビルドキャッシュ
+.turbo/
+
+# 環境変数ファイル
+.env
+.env.*
+!.env.example
+
+# 開発・CI設定
+.claude/
+.git/
+.github/
+
+# エディタ・OS
+.DS_Store
+*.swp
+*.swo
+
+# ドキュメント
+*.md
+
+# Nix
+.direnv/
+flake.lock
+flake.nix
