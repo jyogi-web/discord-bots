@@ -23,6 +23,7 @@ RUN npm ci \
     --workspace=packages/shared \
     --workspace=packages/discord-api \
     --workspace=apps/toy-bear-bot \
+    --include-workspace-root \
     --ignore-scripts
 COPY packages ./packages
 COPY tsconfig.base.json ./
