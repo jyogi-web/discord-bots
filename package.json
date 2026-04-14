@@ -14,7 +14,7 @@
     "lint": "oxlint",
     "lint:eslint": "eslint .",
     "lint:all": "npm run lint && npm run lint:eslint",
-    "test": "vitest",
+    "test": "vitest --coverage",
     "test:run": "turbo test:run",
     "prepare": "turbo build --filter=./packages/*"
   },
@@ -23,6 +23,7 @@
     "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
+    "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^10.2.0",
     "eslint-plugin-oxlint": "^1.59.0",
     "oxlint": "^1.59.0",

@@ -9,6 +9,19 @@ import {
   formatResult,
   buildShuffledForMatches,
 } from './gacha-core.js';
+import { GACHA_DEBUG, DEBUG_SCENARIO_ORDER } from './debug.js';
+
+describe('debug.ts', () => {
+  it('GACHA_DEBUG はデフォルト false', () => {
+    expect(GACHA_DEBUG).toBe(false);
+  });
+
+  it('DEBUG_SCENARIO_ORDER は8シナリオを含む', () => {
+    expect(DEBUG_SCENARIO_ORDER).toEqual([
+      'n0', 'n1', 'r2', 'r3', 'sr', 'ssr', 'legend', 'reversed',
+    ]);
+  });
+});
 
 describe('TARGET_CHARS / REVERSED_CHARS', () => {
   it('TARGET_CHARS は「情報技術研究部」を分割した7文字', () => {
@@ -139,5 +152,48 @@ describe('shuffleChars', () => {
     expect(result).toHaveLength(7);
     expect([...result].sort()).toEqual([...TARGET_CHARS].sort());
     mockRandom.mockRestore();
+  });
+});
+
+// 7文字の全順列での各一致数の理論確率（錯置数から導出）
+// 一致数 0: 36.79%  1: 36.81%  2: 18.33%  3: 6.25%
+//         4: 1.39%  5: 0.42%   6: 不可能   7: 0.02%
+describe('shuffleChars 当たり確率（統計）', () => {
+  // 10_000 回試行して各一致数の出現を集計する
+  // 外れる確率が天文学的に低い下限だけ検証し、偽陰性を防ぐ
+  const TRIALS = 10_000;
+  const results = Array.from({ length: TRIALS }, () => {
+    const s = shuffleChars();
+    return countMatches(s, TARGET_CHARS);
+  });
+  const counts = new Array(8).fill(0);
+  for (const m of results) counts[m]++;
+
+  // SR（4一致）: 理論 1.39%。10,000回で期待値139件。
+  // 50件未満は確率的にほぼ起こり得ない（p < 10^-20）
+  it('SR（4一致）が 10,000 回中 50 回以上出る', () => {
+    expect(counts[4]).toBeGreaterThanOrEqual(50);
+  });
+
+  // SSR（5一致）: 理論 0.42%。10,000回で期待値42件。
+  // 10件未満は確率的にほぼ起こり得ない（p < 10^-15）
+  it('SSR（5一致）が 10,000 回中 10 回以上出る', () => {
+    expect(counts[5]).toBeGreaterThanOrEqual(10);
+  });
+
+  // legend（7一致）: 理論 0.02%。10,000回では期待値2件と少ないため
+  // 50,000 回試行して1件以上を確認する
+  it('legend（7一致）が 50,000 回中 1 回以上出る', () => {
+    const legendTrials = 50_000;
+    let legendCount = 0;
+    for (let i = 0; i < legendTrials; i++) {
+      if (isAllCorrect(shuffleChars())) legendCount++;
+    }
+    expect(legendCount).toBeGreaterThanOrEqual(1);
+  });
+
+  // 6一致は数学的に不可能（残り1文字が強制的に元の位置に戻る）
+  it('6一致は絶対に出ない', () => {
+    expect(counts[6]).toBe(0);
   });
 });
