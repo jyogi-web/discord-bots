@@ -180,7 +180,7 @@ describe('setupGacha', () => {
 
   describe('デバッグモード（GACHA_DEBUG=true）', () => {
     beforeEach(() => {
-      vi.spyOn(debugModule, 'GACHA_DEBUG', 'get').mockReturnValue(true);
+      vi.spyOn(debugModule, 'GACHA_DEBUG', 'get').mockReturnValue(true as never);
     });
 
     it('legend シナリオ: [DEBUG] プレフィックス付きで全一致演出を返す', async () => {
