@@ -1,59 +1,20 @@
 import { type Client } from 'discord.js';
 import type { Logger } from '@discord-bots/shared';
 import { GACHA_DEBUG, DEBUG_SCENARIO_ORDER, type DebugScenario } from './debug.js';
+import {
+  TARGET_CHARS,
+  REVERSED_CHARS,
+  shuffleChars,
+  countMatches,
+  isAllCorrect,
+  isAllReversed,
+  formatResult,
+  buildShuffledForMatches,
+} from './gacha-core.js';
 
-const TARGET_CHARS = '情報技術研究部'.split('');
-const REVERSED_CHARS = [...TARGET_CHARS].reverse();
 const JYOGI_EMOJI = ':jyogi2014:';
 const FIVE_MATCH_STICKER_ID = '1491081864323141793';
 const ALL_CORRECT_STICKER_ID = '1411357962567548969';
-
-function shuffleChars(): string[] {
-  const arr = [...TARGET_CHARS];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function countMatches(shuffled: string[], target: string[]): number {
-  return shuffled.filter((char, i) => char === target[i]).length;
-}
-
-function isAllCorrect(shuffled: string[]): boolean {
-  return countMatches(shuffled, TARGET_CHARS) === TARGET_CHARS.length;
-}
-
-function isAllReversed(shuffled: string[]): boolean {
-  return countMatches(shuffled, REVERSED_CHARS) === REVERSED_CHARS.length;
-}
-
-function formatResult(shuffled: string[]): string {
-  const colored = shuffled.map((char, i) => {
-    if (char === TARGET_CHARS[i]) {
-      return `\x1b[32m${char}\x1b[0m`; // 緑色（当たり）
-    }
-    return char;
-  });
-  return `\`\`\`ansi\n${colored.join('')}\n\`\`\``;
-}
-
-// 指定したマッチ数になるように TARGET_CHARS を部分的に崩した配列を返す。
-// デバッグ用: 特定レアリティの演出を再現するため。
-// 注: 7文字中6文字一致は数学的に不可能なので matches=6 は呼ばないこと。
-function buildShuffledForMatches(matches: number): string[] {
-  const result = [...TARGET_CHARS];
-  const mismatchCount = TARGET_CHARS.length - matches;
-  if (mismatchCount < 2) return result;
-  // 後ろから mismatchCount 文字分を回転させて一致から外す。
-  const tail = result.slice(-mismatchCount);
-  const rotated = [...tail.slice(1), tail[0]];
-  for (let i = 0; i < mismatchCount; i++) {
-    result[TARGET_CHARS.length - mismatchCount + i] = rotated[i];
-  }
-  return result;
-}
 
 function buildShuffledForScenario(scenario: DebugScenario): string[] {
   switch (scenario) {
