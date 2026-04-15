@@ -6,6 +6,16 @@ const COMMANDS = [
   {
     name: 'gacha',
     description: '情報技術研究部の文字をシャッフルします',
+    options: [
+      {
+        type: 4, // INTEGER
+        name: 'times',
+        description: '引く回数（1〜10）',
+        required: false,
+        min_value: 1,
+        max_value: 10,
+      },
+    ],
   },
 
 ];

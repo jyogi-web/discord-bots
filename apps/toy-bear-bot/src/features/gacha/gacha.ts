@@ -76,6 +76,19 @@ function buildShuffledForScenario(scenario: DebugScenario): string[] {
   }
 }
 
+function formatMultipleResults(results: string[][]): string {
+  const lines = results.map((shuffled) => {
+    const colored = shuffled.map((char, i) => {
+      if (char === TARGET_CHARS[i]) {
+        return `\x1b[32m${char}\x1b[0m`;
+      }
+      return char;
+    });
+    return colored.join('');
+  });
+  return `\`\`\`ansi\n${lines.join('\n')}\n\`\`\``;
+}
+
 export function setupGacha(client: Client, logger: Logger): void {
   let debugIndex = 0;
 
@@ -85,51 +98,111 @@ export function setupGacha(client: Client, logger: Logger): void {
 
     await interaction.deferReply();
 
-    let shuffled: string[];
-    if (GACHA_DEBUG) {
-      const scenario = DEBUG_SCENARIO_ORDER[debugIndex % DEBUG_SCENARIO_ORDER.length];
-      debugIndex = (debugIndex + 1) % DEBUG_SCENARIO_ORDER.length;
-      shuffled = buildShuffledForScenario(scenario);
-      logger.info(`[gacha debug] シナリオ: ${scenario}`);
-    } else {
-      shuffled = shuffleChars();
+    const times = interaction.options.getInteger('times') ?? 1;
+
+    const results: string[][] = [];
+    for (let i = 0; i < times; i++) {
+      if (GACHA_DEBUG) {
+        const scenario = DEBUG_SCENARIO_ORDER[debugIndex % DEBUG_SCENARIO_ORDER.length];
+        debugIndex = (debugIndex + 1) % DEBUG_SCENARIO_ORDER.length;
+        results.push(buildShuffledForScenario(scenario));
+        logger.info(`[gacha debug] シナリオ: ${scenario}`);
+      } else {
+        results.push(shuffleChars());
+      }
     }
 
-    const normalMatches = countMatches(shuffled, TARGET_CHARS);
+    const hasAllCorrect = results.some(isAllCorrect);
+    const hasAllReversed = results.some(isAllReversed);
+    const hasFiveMatch = results.some((r) => !isAllCorrect(r) && countMatches(r, TARGET_CHARS) === 5);
 
-    if (isAllCorrect(shuffled)) {
-      const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
-      const debugPrefix = GACHA_DEBUG ? '[DEBUG] ' : '';
-      await interaction.editReply(`${jyogiLine}\n${debugPrefix}おめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
-      if (interaction.channel?.isSendable()) {
-        await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
+    if (times === 1) {
+      const shuffled = results[0];
+      const normalMatches = countMatches(shuffled, TARGET_CHARS);
+
+      if (isAllCorrect(shuffled)) {
+        const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
+        const debugPrefix = GACHA_DEBUG ? '[DEBUG] ' : '';
+        await interaction.editReply(`${jyogiLine}\n${debugPrefix}おめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
+        if (interaction.channel?.isSendable()) {
+          await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
+        }
+        logger.info('gacha: 全て揃えた', {
+          feature: 'gacha',
+          action: 'all_correct',
+          user: interaction.user.username,
+          debug: GACHA_DEBUG,
+        });
+
+      } else if (isAllReversed(shuffled)) {
+        const reversedText = REVERSED_CHARS.join('');
+        await interaction.editReply(`\`\`\`\n${reversedText}\n\`\`\`\n逆順で揃えてしまった...`);
+        logger.info('gacha: 逆順で揃えた', {
+          feature: 'gacha',
+          action: 'reversed',
+          user: interaction.user.username,
+        });
+
+      } else {
+        await interaction.editReply(formatResult(shuffled));
+
+        if (normalMatches === 5 && interaction.channel?.isSendable()) {
+          await interaction.channel.send({ stickers: [FIVE_MATCH_STICKER_ID] });
+          logger.info('gacha: 5文字一致', {
+            feature: 'gacha',
+            action: 'five_match',
+            user: interaction.user.username,
+          });
+        }
       }
-      logger.info('gacha: 全て揃えた', {
-        feature: 'gacha',
-        action: 'all_correct',
-        user: interaction.user.username,
-        debug: GACHA_DEBUG,
-      });
-
-    } else if (isAllReversed(shuffled)) {
-      const reversedText = REVERSED_CHARS.join('');
-      await interaction.editReply(`\`\`\`\n${reversedText}\n\`\`\`\n逆順で揃えてしまった...`);
-      logger.info('gacha: 逆順で揃えた', {
-        feature: 'gacha',
-        action: 'reversed',
-        user: interaction.user.username,
-      });
 
     } else {
-      await interaction.editReply(formatResult(shuffled));
+      // 複数回引いた場合: まとめて表示
+      const suffixes: string[] = [];
 
-      if (normalMatches === 5 && interaction.channel?.isSendable()) {
+      if (hasAllCorrect) {
+        const jyogiLine = Array(7).fill(JYOGI_EMOJI).join('');
+        const debugPrefix = GACHA_DEBUG ? '[DEBUG] ' : '';
+        suffixes.push(`${jyogiLine}\n${debugPrefix}おめでとう！あなたは**名誉じょぎ部員**に認定されました！`);
+        logger.info('gacha: 全て揃えた（複数回）', {
+          feature: 'gacha',
+          action: 'all_correct',
+          user: interaction.user.username,
+          times,
+          debug: GACHA_DEBUG,
+        });
+      }
+
+      if (hasAllReversed) {
+        const reversedText = REVERSED_CHARS.join('');
+        suffixes.push(`\`\`\`\n${reversedText}\n\`\`\`\n逆順で揃えてしまった...`);
+        logger.info('gacha: 逆順で揃えた（複数回）', {
+          feature: 'gacha',
+          action: 'reversed',
+          user: interaction.user.username,
+          times,
+        });
+      }
+
+      const resultText = formatMultipleResults(results);
+      const replyText = suffixes.length > 0
+        ? `${resultText}\n${suffixes.join('\n')}`
+        : resultText;
+
+      await interaction.editReply(replyText);
+
+      if (hasFiveMatch && interaction.channel?.isSendable()) {
         await interaction.channel.send({ stickers: [FIVE_MATCH_STICKER_ID] });
-        logger.info('gacha: 5文字一致', {
+        logger.info('gacha: 5文字一致（複数回）', {
           feature: 'gacha',
           action: 'five_match',
           user: interaction.user.username,
+          times,
         });
+      }
+
+      if (hasAllCorrect && interaction.channel?.isSendable()) {
+        await interaction.channel.send({ stickers: [ALL_CORRECT_STICKER_ID] });
       }
     }
   })());
