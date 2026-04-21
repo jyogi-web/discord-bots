@@ -15,6 +15,7 @@ const envConfig = createConfig({
     FEATURE_KAWAII: 'true',
     FEATURE_EYES_LIPS: 'true',
     FEATURE_GACHA: 'true',
+    FEATURE_SUPERCHAT: 'true',
     DISCORD_ERROR_WEBHOOK_URL: '',
   },
 });
@@ -31,6 +32,7 @@ export const config = {
     kawaii: parseFeatureFlag(envConfig.FEATURE_KAWAII),
     eyesLips: parseFeatureFlag(envConfig.FEATURE_EYES_LIPS),
     gacha: parseFeatureFlag(envConfig.FEATURE_GACHA),
+    superchat: parseFeatureFlag(envConfig.FEATURE_SUPERCHAT),
   },
   kawaii: {
     emojiName: envConfig.TARGET_EMOJI_NAME,

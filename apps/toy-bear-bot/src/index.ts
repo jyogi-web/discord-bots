@@ -5,6 +5,7 @@ import { config } from './config.js';
 import { setupKawaii } from './features/kawaii.js';
 import { setupEyesLips } from './features/eyes-lips.js';
 import { setupGacha } from './features/gacha/gacha.js';
+import { setupSuperchat } from './features/superchat/index.js';
 import { registerCommands } from './deploy-commands.js';
 
 const logger = createLogger('toy-bear-bot');
@@ -51,6 +52,13 @@ if (config.features.gacha) {
   logger.info('Feature: gacha 有効');
 } else {
   logger.info('Feature: gacha 無効 (FEATURE_GACHA=false)');
+}
+
+if (config.features.superchat) {
+  setupSuperchat(client, logger);
+  logger.info('Feature: superchat 有効');
+} else {
+  logger.info('Feature: superchat 無効 (FEATURE_SUPERCHAT=false)');
 }
 
 const shutdownManager = createShutdownManager(logger);

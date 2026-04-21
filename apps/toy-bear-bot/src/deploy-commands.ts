@@ -1,4 +1,4 @@
-import { REST, Routes } from 'discord.js';
+import { REST, Routes, ApplicationCommandOptionType } from 'discord.js';
 import { config } from './config.js';
 import type { Logger } from '@discord-bots/shared';
 
@@ -6,6 +6,26 @@ const COMMANDS = [
   {
     name: 'gacha',
     description: '情報技術研究部の文字をシャッフルします',
+  },
+  {
+    name: 'superchat',
+    description: 'スーパーチャット風の画像を生成します',
+    options: [
+      {
+        name: '金額',
+        description: '100〜50,000円',
+        type: ApplicationCommandOptionType.Integer,
+        required: true,
+        min_value: 100,
+        max_value: 50000,
+      },
+      {
+        name: 'コメント',
+        description: 'コメント（金額により最大文字数が変わります）',
+        type: ApplicationCommandOptionType.String,
+        required: false,
+      },
+    ],
   },
 
 ];
