@@ -4,14 +4,6 @@
 
 [![DiscordにBotを追加](https://img.shields.io/badge/Discord-add%20bot-green?logo=discord)](https://discord.com/oauth2/authorize?client_id=1467536144131555459&scope=bot&permissions=8515702525131840)
 
-## 機能
-
-| 機能 | 説明 |
-|------|------|
-| kawaii転送 | `:kawaii:` リアクションが押された投稿を指定チャンネルに転送 |
-| eyes-lips | `:eyes:` / `👀` のメッセージに `👄` か `🫦` でリアクション |
-| gacha | `/gacha` コマンドで文字をシャッフル |
-
 ## 構成
 
 ```text
